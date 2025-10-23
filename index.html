@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arrival List App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f8fa;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 { color: #222; }
+    form {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #0056b3; }
+    ul {
+      list-style: none;
+      padding: 0;
+      width: 300px;
+    }
+    li {
+      background: white;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <h1>Arrival List</h1>
+  <form id="arrival-form">
+    <input type="text" id="name" placeholder="Enter your name" required />
+    <button type="submit">Submit</button>
+  </form>
+  <ul id="arrivals-list"></ul>
+
+  <script>
+    const API_URL = "http://34.230.89.112:8081/api/arrivals";
+
+    console.log("Backend URL:", API_URL);
+
+    async function fetchArrivals() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      const list = document.getElementById("arrivals-list");
+      list.innerHTML = "";
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = `${item.name} — ${new Date(item.timestamp).toLocaleString()}`;
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById("arrival-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      if (!name) return;
+      // Enviar como query param (compatible con @RequestParam)
+      const url = `${API_URL}?name=${encodeURIComponent(name)}`;
+
+      await fetch(url, {
+          method: "POST",
+      });
+
+      document.getElementById("name").value = "";
+      fetchArrivals();
+    });
+
+    fetchArrivals();
+    setInterval(fetchArrivals, 5000);
+  </script>
+</body>
+</html>
+
